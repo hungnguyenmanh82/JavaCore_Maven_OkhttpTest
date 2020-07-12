@@ -35,7 +35,7 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest {
 
     @Test
-    public void test_OkHttp_Get_Synchronous() throws Exception {
+    public void test1_Sync_Get() throws Exception {
 
         // avoid creating several instances, should be singleon
         OkHttpClient client = new OkHttpClient();
@@ -83,7 +83,7 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void test_OkHttp_Syn_GET_Timeout() throws Exception {
+    public void test14_Syn_GET_Timeout() throws Exception {
 
         //=========================== TimeOut ===================================
         OkHttpClient  client = new OkHttpClient().newBuilder()
@@ -132,7 +132,7 @@ public class ExampleUnitTest {
 
 
     @Test
-    public void test_OkHttp_Sync_Get_requestHeader() throws Exception {
+    public void test13_Sync_Get_requestHeader() throws Exception {
 
         // avoid creating several instances, should be singleon
         OkHttpClient client = new OkHttpClient();
@@ -179,20 +179,21 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void test_OkHttp_Syn_Get_parameters() throws Exception {
+    public void test12_Syn_Get_parameters_header() throws Exception {
 
         // avoid creating several instances, should be singleon
         OkHttpClient client = new OkHttpClient();
 
         //==================================== build URL of http GET =================
-        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://www.vogella.com/index.html").newBuilder();
-        urlBuilder.addQueryParameter("v", "1.0");
-        urlBuilder.addQueryParameter("user", "vogella");
+        HttpUrl.Builder urlBuilder = HttpUrl.parse("http://www.vogella.com/index.html").newBuilder()
+        										.addQueryParameter("v", "1.0")
+        										.addQueryParameter("user", "vogella");
         String url = urlBuilder.build().toString();
         // =============================
 
         Request request = new Request.Builder()
                 .url(url)
+                .addHeader("header1", "headerValue1")
                 .build();
 
         System.out.println("====================== request header ====================");
@@ -222,7 +223,7 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void test_OkHttp_Syn_Get_responseHeader() throws Exception {
+    public void test15_Syn_Get_responseHeader() throws Exception {
 
         // avoid creating several instances, should be singleon
         OkHttpClient client = new OkHttpClient();
@@ -263,7 +264,7 @@ public class ExampleUnitTest {
      * use Okhttp asynchronouse with callback function
      */
     @Test
-    public void test_OkHttp_Asyn_Get() throws Exception {
+    public void test3_Asyn_Get() throws Exception {
 
         // avoid creating several instances, should be singleon
         OkHttpClient client = new OkHttpClient();
@@ -312,7 +313,7 @@ public class ExampleUnitTest {
      * use Okhttp asynchronouse with callback function
      */
     @Test
-    public void test_OkHttp_Asyn_Get_CancelRequest() throws Exception {
+    public void test32_Asyn_Get_CancelRequest() throws Exception {
 
         // avoid creating several instances, should be singleon
         OkHttpClient client = new OkHttpClient();
@@ -367,7 +368,7 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void test_OkHttp_Sync_Post_String() throws Exception {
+    public void test2_Sync_Post_String() throws Exception {
 
         // avoid creating several instances, should be singleon
         OkHttpClient client = new OkHttpClient();
@@ -427,7 +428,7 @@ public class ExampleUnitTest {
 
 
     @Test
-    public void test_OkHttp_Sync_Post_file() throws Exception {
+    public void test23_Sync_Post_file() throws Exception {
         // avoid creating several instances, should be singleon
         OkHttpClient client = new OkHttpClient();
 
@@ -489,7 +490,7 @@ public class ExampleUnitTest {
      * html Form: là định dạng http protocol chuẩn để người dùng nhập dữ liệu vào gửi lên server
      */
     @Test
-    public void test_OkHttp_Sync_Post_Form_Send_PNG_file() throws Exception {
+    public void test22_Sync_Post_Form_Send_PNG_file() throws Exception {
         // avoid creating several instances, should be singleon
         OkHttpClient client = new OkHttpClient();
 
@@ -552,68 +553,5 @@ public class ExampleUnitTest {
 
         assertEquals(4, 2 + 2);
 
-    }
-
-    /**
-     * https://www.programcreek.com/java-api-examples/index.php?api=com.google.mockwebserver.MockWebServer
-     */
-    @Test
-    public void test_MockWebserver() throws Exception {
-        //=============================== start server ================================
-        // use a proxy so we can manipulate the origin server's host name
-        MockWebServer server = new MockWebServer();
-        server.enqueue(new MockResponse()
-                .addHeader("Set-Cookie: a=first; Domain=my.t-mobile.com")
-                .addHeader("Set-Cookie: b=second; Domain=.T-mobile.com")
-                .addHeader("Set-Cookie: c=third; Domain=.t-mobile.com")
-                .setBody("This response sets some cookies."));
-        server.enqueue(new MockResponse()
-                .setBody("This response gets those cookies back."));
-
-        server.play();  //start server here
-
-        // URL này ko capture với WireShark đc
-        System.out.println(server.getUrl("/")); //http://DESKTOP-LBOHS1J:49265  => địa chi localhost
-        //=================================== end server ========================
-
-        // avoid creating several instances, should be singleon
-        OkHttpClient client = new OkHttpClient();
-
-        // url is
-        Request request = new Request.Builder()
-                .url(server.getUrl("/"))
-                .build();
-
-        Response response = client.newCall(request).execute();
-        // synchronous receive response here
-        // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-        System.out.println("====================== response code ================== " );
-        System.out.println("response code = " + response.code());
-        if( response.code() == 200){ //200 = 0k
-            //do something here
-        }
-
-        if( response.isSuccessful() == true){ //response code = 200 to 300
-            //do something here
-        }
-
-        if( response.isRedirect()){ //response code = 3xx
-            //do something here
-        }
-
-        //================================ response header =================
-        Headers headers = response.headers();
-        Map<String, List<String>> map = headers.toMultimap();
-        System.out.println("====================== response header ====================");
-        System.out.print(headers.toString());
-
-        //body of response
-        String body = response.body().string();
-        System.out.print(body);
-
-        // ===============================================
-//        server.shutdown(); //stop server here
-
-        assertEquals(4, 2 + 2);
     }
 }
